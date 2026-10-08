@@ -23,7 +23,7 @@
 ├── app/
 │   ├── app_init.sh        # 容器初始化脚本（环境变量与资源目录准备）
 │   ├── config_update.sh   # 订阅更新与配置参数修改核心脚本
-│   ├── config_loop.sh     # 订阅更新定时循环与重载监控脚本
+│   ├── temporaryconfiguration.yaml     # 样板文件
 │   └── entrypoint.sh      # 容器主入口守护脚本
 ├── Dockerfile             # 容器镜像构建文件
 └── pre_build.sh           # 容器构建前置依赖下载脚本
