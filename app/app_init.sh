@@ -24,8 +24,6 @@ for item in "$RESOURCE_DIR"/*; do
     [ "$name" != "WEBUI" ] && cp -rfu "$item" "$CONFIG_DIR/"
 done
 
-[ ! -f "$CONFIG_FILE" ] && echo "mixed-port: 7890" > "$CONFIG_FILE"
-
 [ -z "$WEBUI_LISTEN_ADDR" ] && WEBUI_LISTEN_ADDR="0.0.0.0:9090"
 
 if [ -z "$WEBUI_SECRET" ] || [ "$WEBUI_SECRET" = "none" ]; then
