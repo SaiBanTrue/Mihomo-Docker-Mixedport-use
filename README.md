@@ -71,7 +71,7 @@ docker run -d \
   -e AUTHENTICATION="username:password123" \
   -e WEBUI_LISTEN_ADDR="0.0.0.0:9090" \
   -e WEBUI_SECRET="secret123456" \
-  ghcr.io/dancying/mihomo:latest
+  ghcr.io/SaiBanTrue/mihomo:latest
 ```
 
 ---
