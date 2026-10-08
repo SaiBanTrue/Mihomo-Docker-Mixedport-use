@@ -2,8 +2,8 @@
 
 set -e
 
-CONFIG_DIR="/config"
-CONFIG_FILE="$CONFIG_DIR/config.yaml"
+CONFIG_DIR="/app"
+CONFIG_FILE="$CONFIG_DIR/temporaryconfiguration.yaml"
 
 YQ_EXPR=""
 DEL_KEYS=""
