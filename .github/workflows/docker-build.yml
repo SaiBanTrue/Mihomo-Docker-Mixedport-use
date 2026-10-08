@@ -1,0 +1,166 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+  schedule:
+    # 每天 UTC 时间 02:00（北京时间 10:00）检查一次更新
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-and-build:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+        packages: write  # 显式声明允许向 GHCR 推送镜像
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # 检查上游更新
+      - name: Check upstream updates
+        id: check_upstream
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 1. 获取 mihomo 最新稳定 Release 标签
+          MIHOMO_TAG=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/MetaCubeX/mihomo/releases/latest" | jq -r '.tag_name')
+
+          # 2. 获取 zashboard 最新稳定 Release 标签
+          ZASHBOARD_TAG=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/Zephyruso/zashboard/releases/latest" | jq -r '.tag_name')
+
+          if [ "$MIHOMO_TAG" = "null" ] || [ -z "$MIHOMO_TAG" ] || [ "$ZASHBOARD_TAG" = "null" ] || [ -z "$ZASHBOARD_TAG" ]; then
+            echo "❌ 获取上游版本信息失败，终止任务。"
+            exit 1
+          fi
+
+          echo "✅ 上游 mihomo 最新稳定版: $MIHOMO_TAG"
+          echo "✅ 上游 zashboard 最新稳定版: $ZASHBOARD_TAG"
+
+          # 设定版本复合标签
+          VERSION_TAG="${MIHOMO_TAG}-${ZASHBOARD_TAG}"
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+          echo "mihomo_tag=$MIHOMO_TAG" >> $GITHUB_OUTPUT
+          echo "zashboard_tag=$ZASHBOARD_TAG" >> $GITHUB_OUTPUT
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/mihomo"
+          echo "image_name=${IMAGE_NAME,,}" >> $GITHUB_OUTPUT
+          
+          # 如果是手动触发或代码 Push，则强制构建，不检测重复
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "⚡ 触发事件为 ${{ github.event_name }}，跳过重复检查，强制执行构建！"
+            echo "trigger_build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # 3. 检查当前用户的 GHCR 中是否已经发布过带有该 VERSION_TAG 的版本
+          # 调用 GitHub Packages REST API 查询已有的版本 tag
+          OWNER="${{ github.repository_owner }}"
+          EXISTS=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/users/${OWNER}/packages/container/mihomo/versions?per_page=100" \
+            | jq -r ".[].metadata.container.tags[]?" | grep -Fx "$VERSION_TAG" || true)
+
+          if [ -n "$EXISTS" ]; then
+            echo "ℹ️ 上游未发布新版本，当前复合版本 [${VERSION_TAG}] 已存在于 GHCR 中，跳过构建。"
+            echo "trigger_build=false" >> $GITHUB_OUTPUT
+          else
+            echo "🚀 发现上游有新版本（或镜像尚未构建）: [${VERSION_TAG}]，开始执行构建！"
+            echo "trigger_build=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run pre-build script
+        if: steps.check_upstream.outputs.trigger_build == 'true'
+        run: bash pre_build.sh
+
+      - name: Set up Docker Buildx
+        if: steps.check_upstream.outputs.trigger_build == 'true'
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        if: steps.check_upstream.outputs.trigger_build == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: steps.check_upstream.outputs.trigger_build == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/arm64
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.check_upstream.outputs.image_name }}:latest
+            ${{ steps.check_upstream.outputs.image_name }}:${{ steps.check_upstream.outputs.version_tag }}
+            ${{ steps.check_upstream.outputs.image_name }}:${{ github.sha }}
+
+
+      - name: Update README with build info
+        if: steps.check_upstream.outputs.trigger_build == 'true'
+        env:
+          VERSION_TAG: ${{ steps.check_upstream.outputs.version_tag }}
+        run: |
+          # 1. 配置 Git 身份
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 2. 先拉取远程最新内容，防止冲突
+          git pull origin main
+
+          # 3. 准备构建时间与新记录
+          BUILD_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
+          NEW_RECORD="- **更新时间**：\`${BUILD_TIME} (CST)\` &nbsp;|&nbsp; **镜像版本**：\`${VERSION_TAG}\`"
+
+          # 4. 使用 Python 插入最新记录并仅保留最近 5 条
+          python3 - <<EOF
+          import re
+
+          with open("README.md", "r", encoding="utf-8") as f:
+              readme = f.read()
+
+          new_record = """$NEW_RECORD"""
+          pattern = r'(<!-- BUILD_INFO_START -->\r?\n)(.*?)(<!-- BUILD_INFO_END -->)'
+
+          def update_history(match):
+              header = match.group(1)
+              existing = match.group(2).strip()
+              # 过滤初始的暂无记录
+              lines = [line for line in existing.splitlines() if "暂无记录" not in line and line.strip()]
+              
+              # 追加到最下方
+              lines.append(new_record)
+              
+              # 仅保留末尾最新的 5 条
+              lines = lines[-5:]
+              return f"{header}" + "\n".join(lines) + f"\n{match.group(3)}"
+
+          new_readme = re.sub(pattern, update_history, readme, flags=re.DOTALL)
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(new_readme)
+          EOF
+
+          # 5. 提交并推送
+          git add README.md
+          if git diff --staged --quiet; then
+            echo "README.md 没有变化，无需提交。"
+          else
+            git commit -m "docs: append build record ${VERSION_TAG} [skip ci]"
+            git push origin main
+          fi
