@@ -1,0 +1,125 @@
+# ※※※※※※※※※※※※※※※ 锚点区域 ※※※※※※※※※※※※※※※
+# 锚点
+Anchor_AA: &Anchor_AA {type: select, include-all: true}
+Anchor_BB: &Anchor_BB {type: url-test, url: 'https://www.g.cn/generate_204', interval: 600, lazy: true, tolerance: 50, timeout: 3000, max-failed-times: 3, hidden: false, include-all: true}
+Anchor_CC: &Anchor_CC {type: url-test, url: 'https://gemini.google.com/app', interval: 600, lazy: true, tolerance: 50, timeout: 3000, max-failed-times: 3, hidden: false, include-all: true}
+Anchor_FI: &Anchor_FI '^(?!.*(到期|过期|剩余|网址|官网|邮箱|订阅|套餐|流量|说明|重置)).*$'
+Anchor_AI: &Anchor_AI '^(?i)(?=.*(台湾|美国)).*$'
+Anchor_PR: &Anchor_PR {type: http, interval: 86400, proxy: DIRECT}
+## Anchor_PR: &Anchor_PR {type: http, interval: 86400, proxy: DIRECT, filter: "^(?!.*(到期|过期|剩余|网址|官网|邮箱|订阅|套餐|流量|说明|重置)).*$"}
+## type：可选http/file/inline  behavior：可选domain/ipcidr/classical format：可选yaml/text/mrs
+rule-anchor:
+  ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
+  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
+  class: &class {type: http, interval: 86400, behavior: classical, format: text}
+
+
+
+# ※※※※※※※※※※※※※※※ 节点订阅 ※※※※※※※※※※※※※※※
+# 将 “订阅链接” 与 “机场名” 替换为所用机场信息； 订阅条数不够可新增，注意开头缩进，不同条数前方 “机场名” 不能重复； 末尾的 “机场名” 作用为每个节点添加机场名称前缀，可自定义。
+proxy-providers:
+  Provider_1: {<<: *Anchor_PR, url: 'https://dash.xn--cp3a08l.com/api/v1/pq/697d62f6f706fe12bb40355326d7b523', override: {additional-prefix: '[Provider_1] '}}
+  Provider_2: {<<: *Anchor_PR, url: 'https://kuacdsagfikejfhaej.360117.xyz/f53eac71-b7f8-42b7-9cc8-7bc68f1ab362', override: {additional-prefix: '[Provider_2] '}}
+
+
+
+# ※※※※※※※※※※※※※※※ 核心配置 ※※※※※※※※※※※※※※※
+# 基础配置
+mixed-port: 7777
+mode: rule
+allow-lan: true
+tcp-concurrent: true                                                    # 并发连接  提升多任务性能
+unified-delay: true                                                     # 统一延迟  减少节点延迟抖动
+log-level: error                                                        # 日志级别  silent（静默）/ error（错误）/ warning（警告）/ info（信息）/ debug（调试）
+ipv6: false
+profile:
+  store-selected: true                                                  # 保存选择  记住上次选择的节点和策略组
+
+# 管理面板
+external-ui-name: zashboard                                             # 面板名称
+external-ui: ./ui                                                        # 面板目录
+external-controller: 0.0.0.0:9090                                       # 面板地址 
+external-ui-url: https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip
+
+# DNS 设置
+dns:
+  enable: true                                                         # 解析服务  启用 Clash 内置 DNS 服务
+  ipv6: true                                                           # 网络协议  启用 IPv6 DNS 解析支持
+  cache-algorithm: arc
+  respect-rules: true                                                 # 遵循规则  不强制遵循规则顺序
+  default-nameserver:
+    - 223.5.5.5          
+    - 114.114.114.114
+    - 119.29.29.29
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  nameserver:
+    - system
+  direct-nameserver:
+    - system
+
+# ※※※※※※※※※※※※※※※ 代理策略组 ※※※※※※※※※※※※※※※
+# 策略组（按服务分组）
+proxy-groups:
+  - {name: Gemini等模型,   <<: *Anchor_CC, filter: *Anchor_AI}
+  - {name: VPN(Export), type: select, proxies: [自动选择, 手动选择]}
+  - {name: 自动选择,   <<: *Anchor_BB}
+  - {name: 手动选择,   <<: *Anchor_AA}
+#   - {name: 自动选择,   <<: *Anchor_BB, filter: *Anchor_FI}
+#   - {name: 手动选择,   <<: *Anchor_AA, filter: *Anchor_FI}
+
+# ※※※※※※※※※※※※※※※ 规则匹配 ※※※※※※※※※※※※※※※
+rules:
+   # 服务分流
+  - RULE-SET,private_ip,DIRECT,no-resolve
+  - RULE-SET,private_domain,DIRECT
+  - DOMAIN-KEYWORD,赔钱机场,VPN(Export)
+  - RULE-SET,youtube_domain,VPN(Export)
+  - RULE-SET,tiktok_domain,VPN(Export)
+  - RULE-SET,twitter_domain,VPN(Export)
+  - RULE-SET,telegram_domain,VPN(Export)
+  - RULE-SET,telegram_ip,VPN(Export)  
+  - RULE-SET,aimodel,Gemini等模型
+  - PROCESS-NAME,Antigravity.exe,Gemini等模型
+  - PROCESS-NAME,Antigravity IDE.exe,Gemini等模型
+  - PROCESS-NAME,language_server.exe,Gemini等模型
+  - PROCESS-NAME,language_server_windows,Gemini等模型
+  - PROCESS-NAME,agy.exe,Gemini等模型
+  - DOMAIN,public.easytier.top,DIRECT
+  - DOMAIN,scholar.google.com,Gemini等模型
+  - RULE-SET,google_domain,Gemini等模型
+  - RULE-SET,scholar,DIRECT
+  - RULE-SET,category-games,DIRECT
+  - RULE-SET,teamviewer,DIRECT
+  - RULE-SET,apple-cn,DIRECT
+  - RULE-SET,steam@cn,DIRECT  
+  - RULE-SET,microsoft@cn,DIRECT
+#  - RULE-SET,cn_domain,DIRECT  
+#  - RULE-SET,cn_ip,DIRECT  
+  - RULE-SET,gfw,VPN(Export)
+  - MATCH,DIRECT
+  
+# 规则来源
+rule-providers: 
+  # 域名规则
+  private_domain:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs",}
+  aimodel:           { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs" }
+  scholar:           { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-scholar-!cn.mrs"}
+  category-games:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-games@cn.mrs"}
+  teamviewer:        { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/teamviewer.mrs"}
+  apple-cn:          { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple-cn.mrs"}
+  steam@cn:          { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam@cn.mrs"}
+  microsoft@cn:      { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft@cn.mrs"}
+  gfw:               { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/gfw.mrs"}
+  google_domain:     { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"}
+  tiktok_domain:     { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"}  
+  twitter_domain:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs"}  
+  telegram_domain:   { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}  
+#  cn_domain:         { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geosite/cn.mrs"}
+  youtube_domain:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"}
+  # IP规则
+  private_ip:        { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs"}
+  telegram_ip:       { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
+#  cn_ip:             { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/cn.mrs"}
+# ※※※※※※※※※※※※※※※ 配置结束 ※※※※※※※※※※※※※※※
