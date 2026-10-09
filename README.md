@@ -31,7 +31,7 @@ docker run -d \
   --network host \
   -v /opt/mihomo/config:/config \
   -e SUB_URL="https://da.x3a.com/api/v1/pq/697d62f=26d523,https://kuacaej.117.xyz/f53ea7bc68f1ab362" \
-  -e UPDATE_INTERVAL=12 \
+  -e UPDATE_INTERVAL=24 \
   -e MIXED_PORT=7777 \
   -e ALLOW_LAN="true" \
   -e IPV6="false" \
