@@ -62,7 +62,7 @@ dns:
 # 策略组（按服务分组）
 proxy-groups:
   - {name: VPN(Export), type: select, proxies: [自动选择, 手动选择]}
-  - {name: Gemini等模型, type: select, proxies: [AI自动选择, AI手动选择]}
+  - {name: Gemini等模型, type: select, proxies: [自动选择, 手动选择, AI自动选择, AI手动选择]}
   - {name: AI自动选择,   <<: *Anchor_BB, filter: *Anchor_AI}
   - {name: AI手动选择,   <<: *Anchor_AA, filter: *Anchor_AI}
   - {name: 自动选择,   <<: *Anchor_BB}
