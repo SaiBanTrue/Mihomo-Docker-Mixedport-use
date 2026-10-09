@@ -58,7 +58,6 @@ update_param "mixed-port" "$MIXED_PORT"
 update_param "allow-lan" "$ALLOW_LAN"
 update_param "ipv6" "$IPV6"
 update_param "mode" "$MIHOMO_MODE"
-[ -n "$BIND_ADDRESS" ] && update_param "bind-address" "\"$BIND_ADDRESS\""
 
 # 处理用户认证列表（如果有配置）
 if [ -n "$AUTHENTICATION" ]; then
