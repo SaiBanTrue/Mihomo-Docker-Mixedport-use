@@ -82,7 +82,7 @@ jobs:
 
       - name: Run pre-build script
         if: steps.check_upstream.outputs.trigger_build == 'true'
-        run: bash .github/ghcrio_build.sh
+        run: bash CoreUiGeo_download.sh
 
       - name: Set up Docker Buildx
         if: steps.check_upstream.outputs.trigger_build == 'true'
@@ -101,7 +101,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile_image
           push: true
           platforms: linux/arm64
           provenance: false
