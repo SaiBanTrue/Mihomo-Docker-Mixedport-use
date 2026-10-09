@@ -34,11 +34,6 @@ ipv6: true                                                              # 网络
 profile:
   store-selected: true                                                  # 保存选择  记住上次选择的节点和策略组
 
-# 管理面板
-external-ui-name: zashboard                                             # 面板名称
-external-ui: ./ui                                                        # 面板目录
-external-controller: 0.0.0.0:9090                                       # 面板地址 
-external-ui-url: https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip
 
 # DNS 设置
 dns:
