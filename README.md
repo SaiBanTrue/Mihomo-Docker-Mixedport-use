@@ -30,16 +30,13 @@ docker run -d \
   --restart always \
   --network host \
   -v /opt/mihomo/config:/config \
-  -e SUB_URL="https://dash.xn--cp3a08l.com/api/v1/pq/697d62f66d7b523,https://kuacdejfhaej.317.xyz/f53eac68f1ab362" \
+  -e SUB_URL="https://da.x3a.com/api/v1/pq/697d62f=26d523,https://kuacaej.117.xyz/f53ea7bc68f1ab362" \
   -e UPDATE_INTERVAL=12 \
   -e MIXED_PORT=7777 \
   -e ALLOW_LAN="true" \
   -e IPV6="false" \
   -e MIHOMO_MODE="rule" \
-  -e AUTHENTICATION="user1:pwd1,user2:pwd2" \
-  -e SKIP_AUTH_PREFIXES = 127.0.0.1/8,::1/128 \
   -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
-  -e WEBUI_SECRET=none \
   ghcr.io/saibantrue/mihomo:latest
 ```
 
@@ -56,7 +53,7 @@ docker run -d \
 | `SUB_URL` | 无 | 订阅链接地址（例如：`http://192.168.1.1/sub?token=123456`）。 |
 | `UPDATE_INTERVAL` | 无 | 订阅配置文件定时更新周期（单位：小时）。 |
 | `WEBUI_LISTEN_ADDR`| `0.0.0.0:9089` | Web UI 控制面板的外部监听地址与端口。 |
-| `WEBUI_SECRET` | Web UI 控制面板的访问密钥。默认随机生成（查看日志获取）。 |
+| `WEBUI_SECRET` | 无 |Web UI 控制面板的访问密钥。 |
 
 ## 2. 配置文件覆写
 
@@ -69,7 +66,7 @@ docker run -d \
 | `IPV6` | 无 | 是否开启 IPv6 支持（可选：`true` / `false`）。 |
 | `MIHOMO_MODE` | 无 | 运行模式（可选：`rule`, `global`, `direct`）。 |
 | `AUTHENTICATION` | 无 | 代理身份验证。多账号用逗号分隔（例如：`"user1:pwd1,user2:pwd2"`）。 |
-| `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的网段范围。多网段用逗号分隔（例如：`127.0.0.1/8,::1/128`）。 |
+| `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的网段范围。多网段用逗号分隔（例如：`"127.0.0.1/8,::1/128"`）。 |
 
 
 # 文件结构

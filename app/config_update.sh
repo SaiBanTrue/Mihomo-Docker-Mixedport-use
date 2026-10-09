@@ -88,3 +88,16 @@ if [ -n "$AUTHENTICATION" ]; then
     # 追加在 log-level 行下方
     sed -i "/^log-level:.*/a ${AUTH_BLOCK}" "$CONFIG_FILE"
 fi
+
+# ==========================================
+# 动态计算并更新订阅拉取周期 (小时 -> 秒)
+# ==========================================
+if [ -n "$UPDATE_INTERVAL" ] && [ "$UPDATE_INTERVAL" -gt 0 ] 2>/dev/null; then
+    # 将小时换算为秒数 (例如: 12小时 * 3600 = 43200秒)
+    INTERVAL_SEC=$(( UPDATE_INTERVAL * 3600 ))
+    
+    # 精准替换 Anchor_PR 里面的 interval 数值
+    sed -i -E "s/(Anchor_PR:.*interval: *)[0-9]+/\1${INTERVAL_SEC}/" "$CONFIG_FILE"
+    
+    echo "====> Subscription update interval set to: ${UPDATE_INTERVAL}h (${INTERVAL_SEC}s)"
+fi

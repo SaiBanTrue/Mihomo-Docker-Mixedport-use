@@ -6,8 +6,7 @@ Anchor_CC: &Anchor_CC {type: url-test, url: 'https://gemini.google.com/app', int
 Anchor_FI: &Anchor_FI '^(?!.*(到期|过期|剩余|网址|官网|邮箱|订阅|套餐|流量|说明|重置)).*$'
 Anchor_AI: &Anchor_AI '^(?i)(?=.*(台湾|美国)).*$'
 Anchor_PR: &Anchor_PR {type: http, interval: 86400, proxy: DIRECT}
-## Anchor_PR: &Anchor_PR {type: http, interval: 86400, proxy: DIRECT, filter: "^(?!.*(到期|过期|剩余|网址|官网|邮箱|订阅|套餐|流量|说明|重置)).*$"}
-## type：可选http/file/inline  behavior：可选domain/ipcidr/classical format：可选yaml/text/mrs
+
 rule-anchor:
   ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
   domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
