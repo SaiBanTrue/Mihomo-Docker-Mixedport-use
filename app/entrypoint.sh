@@ -2,7 +2,7 @@
 
 set -e
 
-source /app/app_init.sh
+source /app/mihomo_init.sh
 
 bash /app/config_update.sh
 

@@ -64,7 +64,7 @@ jobs:
             echo "trigger_build=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # 3. 检查当前用户的 GHCR 中是否已经发布过带有该 VERSION_TAG 的版本
           # 调用 GitHub Packages REST API 查询已有的版本 tag
           OWNER="${{ github.repository_owner }}"
@@ -82,7 +82,7 @@ jobs:
 
       - name: Run pre-build script
         if: steps.check_upstream.outputs.trigger_build == 'true'
-        run: bash pre_build.sh
+        run: bash .github/ghcrio_build.sh
 
       - name: Set up Docker Buildx
         if: steps.check_upstream.outputs.trigger_build == 'true'

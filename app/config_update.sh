@@ -2,7 +2,7 @@
 
 set -e
 
-TEMPLATE_FILE="/app/temporaryconfiguration.yaml"
+TEMPLATE_FILE="/app/template_config.yaml"
 CONFIG_DIR="/config"
 CONFIG_FILE="$CONFIG_DIR/config.yaml"
 
