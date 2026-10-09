@@ -59,24 +59,32 @@ update_param "allow-lan" "$ALLOW_LAN"
 update_param "ipv6" "$IPV6"
 update_param "mode" "$MIHOMO_MODE"
 
-# 处理用户认证列表（如果有配置）
-if [ -n "$AUTHENTICATION" ]; then
-    AUTH_BLOCK="authentication:"
-    IFS=',' read -ra AUTH_ARRAY <<< "$AUTHENTICATION"
-    for auth in "${AUTH_ARRAY[@]}"; do
-        AUTH_BLOCK="${AUTH_BLOCK}\n  - \"$(echo "$auth" | tr -d ' ')\""
-    done
-    sed -i '/^authentication:/,/^[a-zA-Z0-9_-]\+:/ { /^authentication:/d; /^[a-zA-Z0-9_-]\+:/!d }' "$CONFIG_FILE" 2>/dev/null || true
-    sed -i "1i ${AUTH_BLOCK}" "$CONFIG_FILE"
-fi
-
-# 处理免认证网段（如果有配置）
+# ==========================================
+# 处理免认证网段（如果有配置，插入在 log-level 下方）
+# ==========================================
 if [ -n "$SKIP_AUTH_PREFIXES" ]; then
     SKIP_BLOCK="skip-auth-prefixes:"
     IFS=',' read -ra SKIP_ARRAY <<< "$SKIP_AUTH_PREFIXES"
     for prefix in "${SKIP_ARRAY[@]}"; do
         SKIP_BLOCK="${SKIP_BLOCK}\n  - \"$(echo "$prefix" | tr -d ' ')\""
     done
-    sed -i '/^skip-auth-prefixes:/,/^[a-zA-Z0-9_-]\+:/ { /^skip-auth-prefixes:/d; /^[a-zA-Z0-9_-]\+:/!d }' "$CONFIG_FILE" 2>/dev/null || true
-    sed -i "1i ${SKIP_BLOCK}" "$CONFIG_FILE"
+    # 清除历史遗留（防止重复运行叠加）
+    sed -i '/^skip-auth-prefixes:/,/^[a-zA-Z0-9_#-]\+:/ { /^skip-auth-prefixes:/d; /^[a-zA-Z0-9_#-]\+:/!d }' "$CONFIG_FILE" 2>/dev/null || true
+    # 追加在 log-level 行下方
+    sed -i "/^log-level:.*/a ${SKIP_BLOCK}" "$CONFIG_FILE"
+fi
+
+# ==========================================
+# 处理用户认证列表（如果有配置，插入在 log-level 下方）
+# ==========================================
+if [ -n "$AUTHENTICATION" ]; then
+    AUTH_BLOCK="authentication:"
+    IFS=',' read -ra AUTH_ARRAY <<< "$AUTHENTICATION"
+    for auth in "${AUTH_ARRAY[@]}"; do
+        AUTH_BLOCK="${AUTH_BLOCK}\n  - \"$(echo "$auth" | tr -d ' ')\""
+    done
+    # 清除历史遗留（防止重复运行叠加）
+    sed -i '/^authentication:/,/^[a-zA-Z0-9_#-]\+:/ { /^authentication:/d; /^[a-zA-Z0-9_#-]\+:/!d }' "$CONFIG_FILE" 2>/dev/null || true
+    # 追加在 log-level 行下方
+    sed -i "/^log-level:.*/a ${AUTH_BLOCK}" "$CONFIG_FILE"
 fi
