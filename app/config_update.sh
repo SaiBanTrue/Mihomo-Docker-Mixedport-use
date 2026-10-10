@@ -36,58 +36,6 @@ else
     [ ! -f "$CONFIG_FILE" ] && cp -f "$TEMPLATE_FILE" "$CONFIG_FILE"
 fi
 
-# ==========================================
-# 2. 纯 sed 更新环境变量（彻底抛弃 yq，绝无 !!merge）
-# ==========================================
-update_param() {
-    local key="$1"
-    local val="$2"
-    if [ -n "$val" ]; then
-        if grep -q "^${key}:" "$CONFIG_FILE"; then
-            # 如果配置中已存在该字段，原地精准替换
-            sed -i "s|^${key}:.*|${key}: ${val}|" "$CONFIG_FILE"
-        else
-            # 如果配置中原本没有，直接插入到文件第 1 行（置顶）
-            sed -i "1i ${key}: ${val}" "$CONFIG_FILE"
-        fi
-    fi
-}
-
-# 基础参数覆盖
-update_param "mixed-port" "$MIXED_PORT"
-update_param "allow-lan" "$ALLOW_LAN"
-update_param "ipv6" "$IPV6"
-update_param "mode" "$MIHOMO_MODE"
-
-# ==========================================
-# 处理免认证网段（如果有配置，插入在 log-level 下方）
-# ==========================================
-if [ -n "$SKIP_AUTH_PREFIXES" ]; then
-    SKIP_BLOCK="skip-auth-prefixes:"
-    IFS=',' read -ra SKIP_ARRAY <<< "$SKIP_AUTH_PREFIXES"
-    for prefix in "${SKIP_ARRAY[@]}"; do
-        SKIP_BLOCK="${SKIP_BLOCK}\n  - \"$(echo "$prefix" | tr -d ' ')\""
-    done
-    # 清除历史遗留（防止重复运行叠加）
-    sed -i '/^skip-auth-prefixes:/,/^[a-zA-Z0-9_#-]\+:/ { /^skip-auth-prefixes:/d; /^[a-zA-Z0-9_#-]\+:/!d }' "$CONFIG_FILE" 2>/dev/null || true
-    # 追加在 log-level 行下方
-    sed -i "/^log-level:.*/a ${SKIP_BLOCK}" "$CONFIG_FILE"
-fi
-
-# ==========================================
-# 处理用户认证列表（如果有配置，插入在 log-level 下方）
-# ==========================================
-if [ -n "$AUTHENTICATION" ]; then
-    AUTH_BLOCK="authentication:"
-    IFS=',' read -ra AUTH_ARRAY <<< "$AUTHENTICATION"
-    for auth in "${AUTH_ARRAY[@]}"; do
-        AUTH_BLOCK="${AUTH_BLOCK}\n  - \"$(echo "$auth" | tr -d ' ')\""
-    done
-    # 清除历史遗留（防止重复运行叠加）
-    sed -i '/^authentication:/,/^[a-zA-Z0-9_#-]\+:/ { /^authentication:/d; /^[a-zA-Z0-9_#-]\+:/!d }' "$CONFIG_FILE" 2>/dev/null || true
-    # 追加在 log-level 行下方
-    sed -i "/^log-level:.*/a ${AUTH_BLOCK}" "$CONFIG_FILE"
-fi
 
 # ==========================================
 # 动态计算并更新订阅拉取周期 (小时 -> 秒)
@@ -101,3 +49,56 @@ if [ -n "$UPDATE_INTERVAL" ] && [ "$UPDATE_INTERVAL" -gt 0 ] 2>/dev/null; then
     
     echo "====> Subscription update interval set to: ${UPDATE_INTERVAL}h (${INTERVAL_SEC}s)"
 fi
+
+# ==========================================
+# 2. 环境变量参数动态注入引擎
+# ==========================================
+
+# --- 通用函数 1：处理单值参数 (有则替换，无则插到 log-level 下方，未设用默认) ---
+update_param() {
+    local key="$1"
+    local val="$2"
+    if [ -n "$val" ]; then
+        if grep -q "^${key}:" "$CONFIG_FILE"; then
+            # 规则 1：模板已有该参数，原地精准替换
+            sed -i "s|^${key}:.*|${key}: ${val}|" "$CONFIG_FILE"
+        else
+            # 规则 2：模板原本没有，插入到 log-level 下方
+            sed -i "/^log-level:.*/a ${key}: ${val}" "$CONFIG_FILE"
+        fi
+    fi
+    # 规则 3：val 为空（未设置变量），自动跳过，原封不动保留模板默认值
+}
+
+# --- 通用函数 2：处理列表数组 (逗号拆分，插入到 log-level 下方，未设用默认) ---
+update_list() {
+    local key="$1"
+    local raw_val="$2"
+    if [ -n "$raw_val" ]; then
+        local block="${key}:"
+        IFS=',' read -ra arr <<< "$raw_val"
+        for item in "${arr[@]}"; do
+            block="${block}\n  - \"$(echo "$item" | tr -d ' ')\""
+        done
+        # 清除历史遗留并统一插入在 log-level 下方
+        sed -i "/^${key}:/,/^[a-zA-Z0-9_#-]\+:/ { /^${key}:/d; /^[a-zA-Z0-9_#-]\+:/!d }" "$CONFIG_FILE" 2>/dev/null || true
+        sed -i "/^log-level:.*/a ${block}" "$CONFIG_FILE"
+    fi
+}
+
+# ----------------------------------------------------
+# 执行参数更新（代码高度统一、一目了然）
+# ----------------------------------------------------
+GEO_VAL="${GEO_UPDATE:-$(printenv GEO-UPDATE 2>/dev/null)}"
+
+# 1. 基础单值参数
+update_param "mixed-port" "$MIXED_PORT"
+update_param "allow-lan" "$ALLOW_LAN"
+update_param "ipv6" "$IPV6"
+update_param "mode" "$MIHOMO_MODE"
+update_param "geo-auto-update" "$GEO_VAL"
+
+# 2. 认证与白名单列表参数
+update_list "authentication" "$AUTHENTICATION"
+update_list "skip-auth-prefixes" "$SKIP_AUTH_PREFIXES"
+

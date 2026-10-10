@@ -57,7 +57,7 @@ docker run -d \
 | `MIHOMO_MODE` | 无 | 运行模式（可选：`rule`, `global`, `direct`）。 |
 | `AUTHENTICATION` | 无 | 代理身份验证。多账号用逗号分隔（例如：`"user1:pwd1,user2:pwd2"`）。 |
 | `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的网段范围。多网段用逗号分隔（例如：`"127.0.0.1/8,::1/128"`）。 |
-
+| ` GEO_UPDATE` |
 
 # 文件结构
 

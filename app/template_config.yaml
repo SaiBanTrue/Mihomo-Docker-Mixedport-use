@@ -23,6 +23,12 @@ proxy-providers:
 
 # ※※※※※※※※※※※※※※※ 核心配置 ※※※※※※※※※※※※※※※
 # 基础配置
+# 自动更新开关（默认为 false）
+geo-auto-update: false
+geo-update-interval: 24
+geox-url:
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
 mixed-port: 7890                                                        # 监听端口  HTTP + SOCKS5 混合代理端口
 mode: rule                                                              # 工作模式  rule（规则模式）/ global（全局模式）/ direct（直连模式）
 allow-lan: true                                                         # 局域连接  是否允许局域网设备连接
