@@ -24,7 +24,7 @@ cp -rf "$RESOURCE_DIR/WEBUI" "$CONFIG_DIR/"
 # ==========================================
 # 2. 仅当 GEO_UPDATE="true" 时，才复制规则库文件
 # ==========================================
-GEO_VAL="${GEO_UPDATE:-$(printenv GEO-UPDATE 2>/dev/null)}"
+GEO_VAL="${GEO_UPDATE:-false}"
 
 if [ "$GEO_VAL" = "true" ]; then
     echo "====> GEO_UPDATE is true: Copying Geo databases to $CONFIG_DIR..."

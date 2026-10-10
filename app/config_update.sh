@@ -185,9 +185,12 @@ update_param "mode" "$MIHOMO_MODE" "log-level: error"
 
 # 2. 列表参数覆盖注入 (先清理后追加)
 delete_line "authentication"
+update_list "0" "authentication" "$AUTHENTICATION" "log-level: error"
+delete_line "skip-auth-prefixes"
+update_list "0" "skip-auth-prefixes" "$SKIP_AUTH_PREFIXES" "log-level: error"
 
 # 3. Geo 数据库自动更新配置块注入
-GEO_VAL="${GEO_UPDATE:-$(printenv GEO-UPDATE 2>/dev/null)}"
+GEO_VAL="${GEO_UPDATE:-false}"
 update_block "$GEO_VAL" "log-level: error" << 'EOF'
 geo-auto-update: true
 geo-update-interval: 24
