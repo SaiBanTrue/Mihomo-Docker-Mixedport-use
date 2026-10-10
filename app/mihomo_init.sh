@@ -14,15 +14,25 @@ CONFIG_FILE="$CONFIG_DIR/config.yaml"
 
 mkdir -p "$CONFIG_DIR"
 
-if [ "$WEBUI_OVERWRITE" != "false" ]; then
-    rm -rf "$WEBUI_DIR"
-    cp -rf "$RESOURCE_DIR/WEBUI" "$CONFIG_DIR/"
-fi
+# ==========================================
+# 1. 任何情况下清空文件夹，并无条件强制覆盖 WebUI
+# ==========================================
+echo "====> Cleaning up all files in $CONFIG_DIR..."
+rm -rf "$CONFIG_DIR"/*
+cp -rf "$RESOURCE_DIR/WEBUI" "$CONFIG_DIR/"
 
-for item in "$RESOURCE_DIR"/*; do
-    name=$(basename "$item")
-    [ "$name" != "WEBUI" ] && cp -rfu "$item" "$CONFIG_DIR/"
-done
+# ==========================================
+# 2. 仅当 GEO_UPDATE="true" 时，才复制规则库文件
+# ==========================================
+GEO_VAL="${GEO_UPDATE:-$(printenv GEO-UPDATE 2>/dev/null)}"
+
+if [ "$GEO_VAL" = "true" ]; then
+    echo "====> GEO_UPDATE is true: Copying Geo databases to $CONFIG_DIR..."
+    cp -rfu "$RESOURCE_DIR"/geoip* "$CONFIG_DIR/" 2>/dev/null || true
+    cp -rfu "$RESOURCE_DIR"/geosite* "$CONFIG_DIR/" 2>/dev/null || true
+else
+    echo "====> GEO_UPDATE is false: Skipping Geo databases copy."
+fi
 
 [ -z "$WEBUI_LISTEN_ADDR" ] && WEBUI_LISTEN_ADDR="0.0.0.0:9090"
 
