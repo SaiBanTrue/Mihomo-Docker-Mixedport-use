@@ -43,7 +43,7 @@ docker run -it --rm \
   -e SKIP_AUTH_PREFIXES="127.0.0.1/32,192.168.6.0/24" \
   -e TEST_PRIVATE_URL="'https://test.my-rules.com/neaaaaaaaaaaaaaaavate.mrs'" \
   -e WEBUI_SECRET="88888888" \
-  ghcr.dockerproxy.net/saibantrue/mihomo:latest
+  ghcr.io/saibantrue/mihomo:latest
 ```
 
 # 环境变量说明
