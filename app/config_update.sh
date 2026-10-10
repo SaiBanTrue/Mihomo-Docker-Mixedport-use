@@ -152,4 +152,11 @@ update_param "allow-lan" "$ALLOW_LAN" "log-level: error"
 update_param "ipv6" "$IPV6" "log-level: error"
 update_param "mode" "$MIHOMO_MODE" "log-level: error"
 
+# 2. 传入列表，完全覆盖
+delete_line "authentication"
+update_list "0" "authentication" "$AUTHENTICATION" "log-level: error"
+delete_line "skip-auth-prefixes"
+update_list "0" "skip-auth-prefixes" "$SKIP_AUTH_PREFIXES" "log-level: error"
+
+
 
