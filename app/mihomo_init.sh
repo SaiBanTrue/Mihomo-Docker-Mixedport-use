@@ -40,9 +40,7 @@ if [ -z "$WEBUI_SECRET" ] || [ "$WEBUI_SECRET" = "none" ]; then
     WEBUI_SECRET=""
     echo "====> Web UI authentication is DISABLED."
 else
-    echo "***************************************************"
     echo " Web UI password set: $WEBUI_SECRET"
-    echo "***************************************************"
 fi
 
 API_ADDR="${WEBUI_LISTEN_ADDR/0.0.0.0/127.0.0.1}"

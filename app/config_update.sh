@@ -50,6 +50,9 @@ if [ -n "$UPDATE_INTERVAL" ] && [ "$UPDATE_INTERVAL" -gt 0 ] 2>/dev/null; then
     echo "====> Subscription update interval set to: ${UPDATE_INTERVAL}h (${INTERVAL_SEC}s)"
 fi
 
+
+
+
 # ==========================================
 # 2. 环境变量参数动态注入引擎
 # ==========================================
@@ -86,19 +89,38 @@ update_list() {
     fi
 }
 
+# --- 通用函数 3：纯内存 sed 多行 YAML 块动态注入引擎（零临时文件）---
+update_block() {
+    local enable="$1"
+    if [ "$enable" = "true" ]; then
+        local block
+        # 在内存中直接读取文本，并将换行符转为 sed 原生识别的格式（纯内存，无磁盘读写）
+        block=$(cat | sed ':a;N;$!ba;s/\n/\\n/g')
+        
+        # 和 update_list 一模一样的写法：直接一条命令注入到 log-level 下方
+        sed -i "/^log-level:.*/a ${block}" "$CONFIG_FILE"
+    fi
+}
+
 # ----------------------------------------------------
 # 执行参数更新（代码高度统一、一目了然）
 # ----------------------------------------------------
-GEO_VAL="${GEO_UPDATE:-$(printenv GEO-UPDATE 2>/dev/null)}"
-
 # 1. 基础单值参数
 update_param "mixed-port" "$MIXED_PORT"
 update_param "allow-lan" "$ALLOW_LAN"
 update_param "ipv6" "$IPV6"
 update_param "mode" "$MIHOMO_MODE"
-update_param "geo-auto-update" "$GEO_VAL"
 
 # 2. 认证与白名单列表参数
 update_list "authentication" "$AUTHENTICATION"
 update_list "skip-auth-prefixes" "$SKIP_AUTH_PREFIXES"
 
+# 3. 仅当 GEO_UPDATE="true" 时，将完整 Geo 更新块插入到 log-level 下方
+GEO_VAL="${GEO_UPDATE:-$(printenv GEO-UPDATE 2>/dev/null)}"
+update_block "$GEO_VAL" << 'EOF'
+geo-auto-update: true
+geo-update-interval: 24
+geox-url:
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+EOF

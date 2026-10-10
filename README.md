@@ -47,17 +47,17 @@ docker run -d \
 
 | 环境变量 | 默认值 | 描述 |
 | :--- | :--- | :--- |
-| `SUB_URL` | 无 | 订阅链接地址（例如：`http://192.168.1.1/sub?token=123456`）。 |
-| `UPDATE_INTERVAL` | 无 | 订阅配置文件定时更新周期（单位：小时）。 |
-| `WEBUI_LISTEN_ADDR`| `0.0.0.0:9089` | Web UI 控制面板的外部监听地址与端口。 |
-| `WEBUI_SECRET` | 无 |Web UI 控制面板的访问密钥。 |
-| `MIXED_PORT` | 无 | 混合代理端口（例如：`7890`） |
-| `ALLOW_LAN` | 无 | 是否允许局域网外部设备访问（可选：`true` / `false`）。 |
-| `IPV6` | 无 | 是否开启 IPv6 支持（可选：`true` / `false`）。 |
-| `MIHOMO_MODE` | 无 | 运行模式（可选：`rule`, `global`, `direct`）。 |
-| `AUTHENTICATION` | 无 | 代理身份验证。多账号用逗号分隔（例如：`"user1:pwd1,user2:pwd2"`）。 |
-| `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的网段范围。多网段用逗号分隔（例如：`"127.0.0.1/8,::1/128"`）。 |
-| ` GEO_UPDATE` |
+| `SUB_URL` | 无 | 机场节点订阅链接。支持单个链接或多链接聚合，多个链接用英文逗号 `,` 分隔（例如：`"URL1,URL2"`）。 |
+| `UPDATE_INTERVAL` | `24` | 订阅节点自动更新周期（单位：小时）。例如填 `12`，系统将自动换算为 43200 秒写入配置。 |
+| `GEO_UPDATE` | `false` | 路由规则库开关。设为 `true` 时复制内置规则库至 `/config` 并启用自动更新；设为 `false` 时完全排除复制并保持禁用。 |
+| `MIXED_PORT` | `7890` | 混合代理端口（同时支持 HTTP 与 SOCKS5 协议，例如：`7777`）。 |
+| `MIHOMO_MODE` | `rule` | 核心工作分流模式（可选：`rule` 规则分流、`global` 全局代理、`direct` 全局直连）。 |
+| `ALLOW_LAN` | `true` | 是否允许局域网设备连接代理（可选：`true` / `false`）。 |
+| `IPV6` | `true` | 是否开启 IPv6 代理支持（可选：`true` / `false`）。 |
+| `WEBUI_LISTEN_ADDR` | `0.0.0.0:9090` | Web UI 面板与 RESTful API 的监听地址及端口（例如：`0.0.0.0:9089`）。 |
+| `WEBUI_SECRET` | 无 | Web UI 控制面板访问密钥。留空、不传或设置为 `"none"` 均为免密直接访问模式。 |
+| `AUTHENTICATION` | 无 | 代理连接身份验证（SOCKS5/HTTP 账密）。支持多账号，逗号分隔（例如：`"user1:pwd1,user2:pwd2"`）。 |
+| `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的白名单 IP 网段。支持多网段，逗号分隔（例如：`"127.0.0.1/8,::1/128"`）。 |
 
 # 文件结构
 
