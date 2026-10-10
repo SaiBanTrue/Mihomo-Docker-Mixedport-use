@@ -17,8 +17,8 @@ rule-anchor:
 # ※※※※※※※※※※※※※※※ 节点订阅 ※※※※※※※※※※※※※※※
 # 将 “订阅链接” 与 “机场名” 替换为所用机场信息； 订阅条数不够可新增，注意开头缩进，不同条数前方 “机场名” 不能重复； 末尾的 “机场名” 作用为每个节点添加机场名称前缀，可自定义。
 proxy-providers:
-  PROVIDERS_PLACEHOLDER
-
+  Provider_1: {<<: *Anchor_PR, url: 'https://dah.n-=l.com/api/v1/q/697726db523', override: {additional-prefix: '[Provider_1] '}}
+  Provider_2: {<<: *Anchor_PR, url: 'https://dah.n-=l.com/api/v1/q/697726db523', override: {additional-prefix: '[Provider_2] '}}
 
 
 # ※※※※※※※※※※※※※※※ 核心配置 ※※※※※※※※※※※※※※※
@@ -99,7 +99,7 @@ rules:
 # 规则来源
 rule-providers: 
   # 域名规则
-  private_domain:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs",}
+  private_domain:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"}
   aimodel:           { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs" }
   scholar:           { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-scholar-!cn.mrs"}
   category-games:    { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-games@cn.mrs"}
