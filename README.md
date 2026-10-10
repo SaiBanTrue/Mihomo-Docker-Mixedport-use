@@ -22,22 +22,28 @@
 - [Zephyruso/zashboard](https://github.com/Zephyruso/zashboard)
 
 
-# 容器运行
+# 容器运行（示例）
 
 ```bash
-docker run -d \
-  --name mihomo \
-  --restart always \
+docker run -it --rm \
+  --name mihomo-test \
+  --entrypoint bash \
   --network host \
-  -v /opt/mihomo/config:/config \
+  -v /mnt/data/docker/mihomotest:/app \
+  -v /mnt/data/docker/mihomo/config:/config \
   -e SUB_URL="https://da.x3a.com/api/v1/pq/697d62f=26d523,https://kuacaej.117.xyz/f53ea7bc68f1ab362" \
-  -e UPDATE_INTERVAL=24 \
+  -e UPDATE_INTERVAL=86400 \
   -e MIXED_PORT=7777 \
   -e ALLOW_LAN="true" \
   -e IPV6="false" \
   -e MIHOMO_MODE="rule" \
+  -e GEO_UPDATE="false" \
   -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
-  ghcr.io/saibantrue/mihomo:latest
+  -e AUTHENTICATION="admin:123456,guest:password" \
+  -e SKIP_AUTH_PREFIXES="127.0.0.1/32,192.168.6.0/24" \
+  -e TEST_PRIVATE_URL="'https://test.my-rules.com/neaaaaaaaaaaaaaaavate.mrs'" \
+  -e WEBUI_SECRET="88888888" \
+  ghcr.dockerproxy.net/saibantrue/mihomo:latest
 ```
 
 # 环境变量说明
