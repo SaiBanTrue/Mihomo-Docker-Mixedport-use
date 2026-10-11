@@ -6,6 +6,18 @@ source /app/mihomo_init.sh
 
 bash /app/config_update.sh
 
+if [ -f "$CONFIG_FILE" ]; then
+    echo "====> Found config file: $CONFIG_FILE. Validating..."
+    if ! /app/mihomo -t -d "$CONFIG_DIR" -f "$CONFIG_FILE"; then
+        echo "====> ERROR: Configuration validation failed. Exiting."
+        exit 1
+    fi
+    echo "====> Configuration validation passed."
+else
+    echo "====> WARNING: No config file found at $CONFIG_FILE. Skipping validation."
+    exit 1
+fi
+
 _term() {
     killall -9 mihomo 2>/dev/null || true
     exit 0

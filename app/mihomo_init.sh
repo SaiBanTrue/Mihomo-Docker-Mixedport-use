@@ -14,23 +14,19 @@ CONFIG_FILE="$CONFIG_DIR/config.yaml"
 
 mkdir -p "$CONFIG_DIR"
 
-# ==========================================
-# 1. 任何情况下清空文件夹，并无条件强制覆盖 WebUI
-# ==========================================
-echo "====> Cleaning up all files in $CONFIG_DIR..."
-rm -rf "$CONFIG_DIR"/*
+shopt -s extglob
+echo "====> Cleaning up files in $CONFIG_DIR (preserving Geo and config.yaml)..."
+rm -rf "$CONFIG_DIR"/!(config.yaml|geoip*|geosite*) 2>/dev/null || true
+shopt -u extglob
 cp -rf "$RESOURCE_DIR/WEBUI" "$CONFIG_DIR/"
 
-# ==========================================
-# 2. 仅当 GEO_UPDATE="true" 时，才复制规则库文件
-# ==========================================
 GEO_VAL="${GEO_UPDATE:-false}"
-
 if [ "$GEO_VAL" = "true" ]; then
     echo "====> GEO_UPDATE is true: Copying Geo databases to $CONFIG_DIR..."
     cp -rfu "$RESOURCE_DIR"/geoip* "$CONFIG_DIR/" 2>/dev/null || true
     cp -rfu "$RESOURCE_DIR"/geosite* "$CONFIG_DIR/" 2>/dev/null || true
 else
+    rm -rf "$CONFIG_DIR"/geoip* "$CONFIG_DIR"/geosite* 2>/dev/null || true
     echo "====> GEO_UPDATE is false: Skipping Geo databases copy."
 fi
 
