@@ -1,4 +1,4 @@
-# Mihomo-Docker-Mixedport 介绍(2026.10.11更新，可用，arm设备)
+# Mihomo-Docker-Mixedport 介绍(v1.0可用，arm设备)
 
 
 一个基于 Alpine Linux 的轻量化 Mihomo (Clash Meta) 容器构建方案。支持自动化依赖预处理、多环境变量动态配置以及 GitHub Actions 自动化容器构建。  
@@ -65,7 +65,7 @@ docker run -it --rm \
 | `AUTHENTICATION` | 无 | 代理连接身份验证（SOCKS5/HTTP 账密）。支持多账号，逗号分隔（例如：`"user1:pwd1,user2:pwd2"`）。 |
 | `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的白名单 IP 网段。支持多网段，逗号分隔（例如：`"127.0.0.1/8,::1/128"`）。 |
 
-注：USE_CUSTOM_CONFIG="true"情况下, 仅WEBUI_LISTEN_ADDR, WEBUI_SECRET, AUTHENTICATION, SKIP_AUTH_PREFIXES设置有效
+注：USE_CUSTOM_CONFIG="true"情况下, 仅WEBUI_LISTEN_ADDR, WEBUI_SECRET设置有效
 # 文件结构
 
 ## Git 原始项目文件结构（源码库）
