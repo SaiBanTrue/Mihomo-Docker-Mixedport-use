@@ -11,9 +11,10 @@
 - **多重请求头订阅**：多 User-Agent 轮询订阅与回退，内置失败容错与历史归档，提升订阅更新成功率。  
 - **高可用守护进程**：内置防崩溃与轻量级进程守护机制，在定时更新或核心异常退出时无缝自动完成重载。  
 - **全平台容器兼容**：规范基础镜像路径声明，消除工具链差异，兼容 Docker 与 Podman 等主流环境。  
-- **实时追踪与构建**：实现内核与面板的永久自动保鲜。(__新增特性__)
-
-
+- **新增如下特性**
+- **实时追踪与构建**：实现内核与面板的永久自动保鲜。(每3天检查一次mihomo内核和zashboard面板)
+- **实现自定义yaml**：实现自定义yaml（推荐使用），
+- **macvlan+tun模式**：macvlan+tun模式下隔离宿主机网络和容器网络，稳定宿主机网络环境
 ## 致谢与参考
 
 本项目基于以下等开源项目：
@@ -185,8 +186,7 @@ sudo sysctl -p
 ```text
 docker network rm mihomo-macvlan 2>/dev/null || true
 ```
-步骤 6：创建 Macvlan 网络（不加 --ip-range 限制，方便自由分配任意固定 IP）。
-       主路由局域网网段：192.168.6.0/24，上级路由器 IP（网关）：192.168.6.1
+步骤 6：创建 Macvlan 网络（不加 --ip-range 限制，方便自由分配任意固定 IP）。主路由局域网网段：192.168.6.0/24，上级路由器 IP（网关）：192.168.6.1
 ```text
 docker network create -d macvlan \
   --subnet=192.168.6.0/24 \
@@ -202,8 +202,7 @@ docker network ls | grep mihomo-macvlan
 ```text
 docker network rm mihomo-macvlan
 ```
-部署：自定义yanl文件+Tun。
-自定义ip：192.168.6.250
+部署：自定义yanl文件+Tun。自定义ip：192.168.6.250
 ```text
 docker run -d \
   --name mihomo \
