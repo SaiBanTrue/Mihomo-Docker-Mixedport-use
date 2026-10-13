@@ -163,7 +163,7 @@ Mihomo-Docker-Mixedport/
 
 # macvlan模式+tun模式+自定义yaml文件
 
-```text
+
 步骤 1：查看宿主机当前默认物理网卡与网关信息
 ```text
 ip route show default
