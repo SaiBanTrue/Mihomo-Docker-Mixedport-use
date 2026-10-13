@@ -163,37 +163,47 @@ Mihomo-Docker-Mixedport/
 
 # macvlan模式+tun模式+自定义yaml文件
 
+```text
 步骤 1：查看宿主机当前默认物理网卡与网关信息
+```text
 ip route show default
-
+```
 步骤 2：宿主机开启网卡混杂模式与 IP 转发（此处以 eth0 为例，请替换为实际网卡名）
+```text
 sudo ip link set eth0 promisc on
-
+```
 步骤 3：开启 IPv4 数据包转发（旁路由流量转发必需）
+```text
 sudo sysctl -w net.ipv4.ip_forward=1
-
+```
 步骤 4：若需持久化 IPv4 转发：
+```text
 echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
-
+```
 步骤 5：清理同名旧网络并创建 Docker Macvlan 网络（如有）
+```text
 docker network rm mihomo-macvlan 2>/dev/null || true
-
+```
 步骤 6：创建 Macvlan 网络（不加 --ip-range 限制，方便自由分配任意固定 IP）
        主路由局域网网段：192.168.6.0/24，上级路由器 IP（网关）：192.168.6.1
+```text
 docker network create -d macvlan \
   --subnet=192.168.6.0/24 \
   --gateway=192.168.6.1 \
   -o parent=eth0 \
   mihomo-macvlan
-
+```
 步骤 7：验证网络是否创建成功
+```text
 docker network ls | grep mihomo-macvlan
-
+```
 步骤 8：删除macvlan网络
+```text
 docker network rm mihomo-macvlan
-
-注：自定义yanl文件+Tun
+```
+部署：自定义yanl文件+Tun
+```text
   --name mihomo \
   --restart always \
   --cap-add NET_ADMIN \
@@ -206,6 +216,7 @@ docker network rm mihomo-macvlan
   -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
   -e TZ=Asia/Shanghai \
   ghcr.io/saibantrue/mihomo:latest
+```
 
 # 构建更新记录
 
