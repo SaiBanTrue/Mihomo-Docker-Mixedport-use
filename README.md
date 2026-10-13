@@ -203,7 +203,9 @@ docker network ls | grep mihomo-macvlan
 docker network rm mihomo-macvlan
 ```
 部署：自定义yanl文件+Tun
+自定义ip：192.168.6.250
 ```text
+docker run -d \
   --name mihomo \
   --restart always \
   --cap-add NET_ADMIN \
