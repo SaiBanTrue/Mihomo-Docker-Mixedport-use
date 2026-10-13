@@ -23,14 +23,14 @@
 
 
 # 容器运行（示例）
-
+注：替换参数模式
+注：/mnt/data/docker/mihomoconfig:是宿主机目录，不随docker镜像删除而删除
 ```bash
 docker run -it --rm \
   --name mihomo-test \
   --entrypoint bash \
   --network host \
-  -v /mnt/data/docker/mihomotest:/app \
-  -v /mnt/data/docker/mihomo/config:/config \
+  -v /mnt/data/docker/mihomoconfig:/config \
   -e SUB_URL="https://da.x3a.com/api/v1/pq/697d62f=26d523,https://kuacaej.117.xyz/f53ea7bc68f1ab362" \
   -e UPDATE_INTERVAL=86400 \
   -e MIXED_PORT=7777 \
@@ -45,6 +45,20 @@ docker run -it --rm \
   -e WEBUI_SECRET="88888888" \
   ghcr.io/saibantrue/mihomo:latest
 ```
+
+
+注：用户自定义模式，把yaml文件放到/mnt/data/docker/mihomoconfig，USE_CUSTOM_CONFIG="true"情况下
+```bash
+docker run -d \
+  --name mihomo \
+  --restart always \
+  --network host \
+  -v /mnt/data/docker/mihomoconfig:/config \
+  -e USE_CUSTOM_CONFIG="true" \
+  -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
+  ghcr.io/saibantrue/mihomo:latest
+```
+
 
 # 环境变量说明
 
@@ -147,6 +161,51 @@ Mihomo-Docker-Mixedport/
     └── assets/
 ```
 
+# macvlan模式+tun模式+自定义yaml文件
+
+步骤 1：查看宿主机当前默认物理网卡与网关信息
+ip route show default
+
+步骤 2：宿主机开启网卡混杂模式与 IP 转发（此处以 eth0 为例，请替换为实际网卡名）
+sudo ip link set eth0 promisc on
+
+步骤 3：开启 IPv4 数据包转发（旁路由流量转发必需）
+sudo sysctl -w net.ipv4.ip_forward=1
+
+步骤 4：若需持久化 IPv4 转发：
+echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+步骤 5：清理同名旧网络并创建 Docker Macvlan 网络（如有）
+docker network rm mihomo-macvlan 2>/dev/null || true
+
+步骤 6：创建 Macvlan 网络（不加 --ip-range 限制，方便自由分配任意固定 IP）
+       主路由局域网网段：192.168.6.0/24，上级路由器 IP（网关）：192.168.6.1
+docker network create -d macvlan \
+  --subnet=192.168.6.0/24 \
+  --gateway=192.168.6.1 \
+  -o parent=eth0 \
+  mihomo-macvlan
+
+步骤 7：验证网络是否创建成功
+docker network ls | grep mihomo-macvlan
+
+步骤 8：删除macvlan网络
+docker network rm mihomo-macvlan
+
+注：自定义yanl文件+Tun
+  --name mihomo \
+  --restart always \
+  --cap-add NET_ADMIN \
+  --cap-add NET_RAW \
+  --network mihomo-macvlan \
+  --ip 192.168.6.250 \
+  --device /dev/net/tun \
+  -v /mnt/data/docker/mihomoconfig:/config \
+  -e USE_CUSTOM_CONFIG="true" \
+  -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
+  -e TZ=Asia/Shanghai \
+  ghcr.io/saibantrue/mihomo:latest
 
 # 构建更新记录
 
