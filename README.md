@@ -212,7 +212,7 @@ Mihomo-Docker-Mixedport/
 ## 容器启动后（config_update.sh 运行后的文件变化）
 
 ```text
-/config/  or  /opt/mihomo/config/   #  -v /opt/mihomo/config:/config \
+宿主机/mnt/data/docker/mihomoconfig  #  -v /opt/mihomo/config:/config \
 ├── config.yaml                     # 🌟 用户当前生效的主配置（包含注入的订阅和端口参数）
 ├── geoip.metadb                    # 路由 IP 分流数据库
 ├── geosite.dat                     # 路由域名分流数据库
