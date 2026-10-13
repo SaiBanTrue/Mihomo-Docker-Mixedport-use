@@ -220,7 +220,7 @@ docker run -d \
   ghcr.io/saibantrue/mihomo:latest
 ```
 
-# 构建更新记录
+# ghcr.io构建更新记录
 
 <!-- BUILD_INFO_START -->
 - **更新时间**：`2026-10-10 18:26:22 (CST)` &nbsp;|&nbsp; **镜像版本**：`v1.19.32-v3.29.1`
