@@ -185,7 +185,7 @@ sudo sysctl -p
 ```text
 docker network rm mihomo-macvlan 2>/dev/null || true
 ```
-步骤 6：创建 Macvlan 网络（不加 --ip-range 限制，方便自由分配任意固定 IP）
+步骤 6：创建 Macvlan 网络（不加 --ip-range 限制，方便自由分配任意固定 IP）。
        主路由局域网网段：192.168.6.0/24，上级路由器 IP（网关）：192.168.6.1
 ```text
 docker network create -d macvlan \
@@ -202,7 +202,7 @@ docker network ls | grep mihomo-macvlan
 ```text
 docker network rm mihomo-macvlan
 ```
-部署：自定义yanl文件+Tun
+部署：自定义yanl文件+Tun。
 自定义ip：192.168.6.250
 ```text
 docker run -d \
