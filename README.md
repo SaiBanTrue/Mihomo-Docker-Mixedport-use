@@ -15,6 +15,8 @@
 - **实时追踪与构建**：实现内核与面板的永久自动保鲜。(每3天检查一次mihomo内核和zashboard面板)
 - **实现自定义yaml**：实现自定义yaml（推荐使用）
 - **macvlan+tun模式**：macvlan+tun模式下隔离宿主机网络和容器网络，稳定宿主机网络环境
+
+
 ## 致谢与参考
 
 本项目基于以下等开源项目：
@@ -45,7 +47,6 @@ docker run -it --rm \
   -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
   -e AUTHENTICATION="admin:123456,guest:password" \
   -e SKIP_AUTH_PREFIXES="127.0.0.1/32,192.168.6.0/24" \
-  -e TEST_PRIVATE_URL="'https://test.my-rules.com/neaaaaaaaaaaaaaaavate.mrs'" \
   -e WEBUI_SECRET="88888888" \
   ghcr.io/saibantrue/mihomo:latest
 ```
