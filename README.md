@@ -203,7 +203,7 @@ Mihomo-Docker-Mixedport/
 │       ├── geosite.dat             # 域名分流规则库原始副本
 │       └── WEBUI/                  # Zashboard 前端面板原始副本
 │           └── ...
-├── config/                         # 📁【数据卷挂载点】 (VOLUME 声明，VOLUME [ "/config" ] )
+├── config/                         # 【数据卷挂载点】 (VOLUME 声明，VOLUME [ "/config" ] )
 ├── bin/                            # Alpine 基础命令工具箱 (bash, curl, tzdata, sed, awk)
 ├── etc/                            # 系统配置 (含 /etc/localtime 时区 Shanghai)
 └── ...                             # (其他标准 Linux 根系统目录: /lib, /usr, /proc, /sys 等)
@@ -214,7 +214,7 @@ Mihomo-Docker-Mixedport/
 
 ```text
 宿主机/mnt/data/docker/mihomoconfig  #  -v /opt/mihomo/config:/config \
-├── config.yaml                     # 🌟 用户当前生效的主配置（包含注入的订阅和端口参数）
+├── config.yaml                     # 用户当前生效的主配置（包含注入的订阅和端口参数）
 ├── geoip.metadb                    # 路由 IP 分流数据库
 ├── geosite.dat                     # 路由域名分流数据库
 └── WEBUI/                          # Zashboard 网页控制台资源（浏览器直接访问此目录）
