@@ -16,7 +16,7 @@ mkdir -p "$CONFIG_DIR"
 
 shopt -s extglob
 echo "====> Cleaning up files in $CONFIG_DIR (preserving Geo and config.yaml)..."
-rm -rf "$CONFIG_DIR"/!(config.yaml|geoip*|geosite*) 2>/dev/null || true
+rm -rf "$CONFIG_DIR"/!(config.yaml|geoip*|geosite*|proxies|rules|cache.db) 2>/dev/null || true
 shopt -u extglob
 
 mkdir -p "$WEBUI_DIR"
