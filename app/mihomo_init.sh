@@ -19,8 +19,8 @@ echo "====> Cleaning up files in $CONFIG_DIR (preserving Geo and config.yaml)...
 rm -rf "$CONFIG_DIR"/!(config.yaml|geoip*|geosite*) 2>/dev/null || true
 shopt -u extglob
 
-mkdir -p "$WEBUI_DIR"
-cp -rf "$RESOURCE_DIR/WEBUI/." "$WEBUI_DIR/"
+# mkdir -p "$WEBUI_DIR"
+# cp -rf "$RESOURCE_DIR/WEBUI/." "$WEBUI_DIR/"
 
 GEO_VAL="${GEO_UPDATE:-false}"
 if [ "$GEO_VAL" = "true" ]; then
