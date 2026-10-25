@@ -6,14 +6,8 @@
 
 ## 特性
 
-- **高效流水线构建**：依赖准备与镜像构建解耦，借助本地或 CI/CD 预处理脚本，打包核心文件和分发。  
-- **参数动态化注入**：通过容器环境变量覆盖配置，免除手动修改配置文件，运行时即可动态调整网络策略。  
-- **多重请求头订阅**：多 User-Agent 轮询订阅与回退，内置失败容错与历史归档，提升订阅更新成功率。  
-- **高可用守护进程**：内置防崩溃与轻量级进程守护机制，在定时更新或核心异常退出时无缝自动完成重载。  
-- **全平台容器兼容**：规范基础镜像路径声明，消除工具链差异，兼容 Docker 与 Podman 等主流环境。  
-- **新增如下特性：**
 - **实时追踪与构建**：实现内核与面板的永久自动保鲜。(每3天检查一次mihomo内核和zashboard面板)
-- **实现自定义yaml**：实现自定义yaml（推荐使用）
+- **实现自定义yaml**：自定义yaml
 - **macvlan+tun模式**：macvlan+tun模式下隔离宿主机网络和容器网络，稳定宿主机网络环境
 
 
@@ -27,45 +21,8 @@
 
 # 容器运行
 
-**示例1：参数覆写**
 
-注：替换参数模式
-注：/mnt/data/docker/mihomoconfig:是宿主机目录，不随docker镜像删除而删除
-```bash
-docker run -it --rm \
-  --name mihomo-test \
-  --entrypoint bash \
-  --network host \
-  -v /mnt/data/docker/mihomoconfig:/config \
-  -e SUB_URL="https://da.x3a.com/api/v1/pq/697d62f=26d523,https://kuacaej.117.xyz/f53ea7bc68f1ab362" \
-  -e UPDATE_INTERVAL=86400 \
-  -e MIXED_PORT=7777 \
-  -e ALLOW_LAN="true" \
-  -e IPV6="false" \
-  -e MIHOMO_MODE="rule" \
-  -e GEO_UPDATE="false" \
-  -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
-  -e AUTHENTICATION="admin:123456,guest:password" \
-  -e SKIP_AUTH_PREFIXES="127.0.0.1/32,192.168.6.0/24" \
-  -e WEBUI_SECRET="88888888" \
-  ghcr.io/saibantrue/mihomo:latest
-```
-
-**示例2：yaml自定义**
-
-注：用户自定义模式，把yaml文件放到/mnt/data/docker/mihomoconfig，USE_CUSTOM_CONFIG="true"情况下
-```bash
-docker run -d \
-  --name mihomo \
-  --restart always \
-  --network host \
-  -v /mnt/data/docker/mihomoconfig:/config \
-  -e USE_CUSTOM_CONFIG="true" \
-  -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
-  ghcr.io/saibantrue/mihomo:latest
-```
-
-**示例3：macvlan模式+tun模式+自定义yaml文件**
+**示例：macvlan模式+tun模式+自定义yaml文件**
 
 步骤 1：查看宿主机当前默认物理网卡与网关信息
 ```text
@@ -115,8 +72,6 @@ docker run -d \
   --ip 192.168.6.250 \
   --device /dev/net/tun \
   -v /mnt/data/docker/mihomoconfig:/config \
-  -e USE_CUSTOM_CONFIG="true" \
-  -e WEBUI_LISTEN_ADDR="0.0.0.0:9089" \
   -e TZ=Asia/Shanghai \
   ghcr.io/saibantrue/mihomo:latest
 ```
@@ -128,17 +83,7 @@ docker run -d \
 
 | 环境变量 | 默认值 | 描述 |
 | :--- | :--- | :--- |
-| `SUB_URL` | 无 | 机场节点订阅链接。支持单个链接或多链接聚合，多个链接用英文逗号 `,` 分隔（例如：`"URL1,URL2"`）。 |
-| `UPDATE_INTERVAL` | `24` | 订阅节点自动更新周期（单位：小时）。例如填 `12`，系统将自动换算为 43200 秒写入配置。 |
 | `GEO_UPDATE` | `false` | 路由规则库开关。设为 `true` 时复制内置规则库至 `/config` 并启用自动更新；设为 `false` 时完全排除复制并保持禁用。 |
-| `MIXED_PORT` | `7890` | 混合代理端口（同时支持 HTTP 与 SOCKS5 协议，例如：`7777`）。 |
-| `MIHOMO_MODE` | `rule` | 核心工作分流模式（可选：`rule` 规则分流、`global` 全局代理、`direct` 全局直连）。 |
-| `ALLOW_LAN` | `true` | 是否允许局域网设备连接代理（可选：`true` / `false`）。 |
-| `IPV6` | `true` | 是否开启 IPv6 代理支持（可选：`true` / `false`）。 |
-| `WEBUI_LISTEN_ADDR` | `0.0.0.0:9090` | Web UI 面板与 RESTful API 的监听地址及端口（例如：`0.0.0.0:9089`）。 |
-| `WEBUI_SECRET` | 无 | Web UI 控制面板访问密钥。留空、不传或设置为 `"none"` 均为免密直接访问模式。 |
-| `AUTHENTICATION` | 无 | 代理连接身份验证（SOCKS5/HTTP 账密）。支持多账号，逗号分隔（例如：`"user1:pwd1,user2:pwd2"`）。 |
-| `SKIP_AUTH_PREFIXES` | 无 | 免身份验证的白名单 IP 网段。支持多网段，逗号分隔（例如：`"127.0.0.1/8,::1/128"`）。 |
 
 注：USE_CUSTOM_CONFIG="true"情况下, 仅WEBUI_LISTEN_ADDR, WEBUI_SECRET设置有效
 # 文件结构
