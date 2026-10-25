@@ -6,7 +6,7 @@ LATEST_TAG=$(curl -s https://api.github.com/repos/MetaCubeX/mihomo/releases/late
 MIHOMO_URL="https://github.com/MetaCubeX/mihomo/releases/download/${LATEST_TAG}/mihomo-linux-arm64-${LATEST_TAG}.gz"
 METADB_URL="https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb"
 GEOSITE_URL="https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
-WEBUI_URL="https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip"
+WEBUI_URL="https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip"
 
 APP_DIR="./app"
 RES_DIR="$APP_DIR/res"

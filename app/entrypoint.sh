@@ -4,21 +4,6 @@ set -e
 
 source /app/mihomo_init.sh
 
-
-CUSTOM_CONFIG_VAL="${USE_CUSTOM_CONFIG:-false}"
-
-if [ "$CUSTOM_CONFIG_VAL" = "true" ] || [ "$CUSTOM_CONFIG_VAL" = "TRUE" ]; then
-    echo "====> USE_CUSTOM_CONFIG is enabled."
-    if [ ! -f "$CONFIG_FILE" ]; then
-        echo "====> ERROR: Custom config file not found at $CONFIG_FILE! Please mount it correctly."
-        exit 1
-    fi
-    echo "====> Using custom configuration from $CONFIG_FILE (skipping config_update.sh)."
-else
-    echo "====> Generating configuration via config_update.sh..."
-    bash /app/config_update.sh
-fi
-
 if [ -f "$CONFIG_FILE" ]; then
     echo "====> Found config file: $CONFIG_FILE. Validating..."
     if ! /app/mihomo -t -d "$CONFIG_DIR" -f "$CONFIG_FILE"; then

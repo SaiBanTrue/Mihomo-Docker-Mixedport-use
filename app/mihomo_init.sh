@@ -9,7 +9,7 @@ MAX_RETRIES=3
 
 RESOURCE_DIR="/app/res"
 CONFIG_DIR="/config"
-WEBUI_DIR="$CONFIG_DIR/ui"
+WEBUI_DIR="$CONFIG_DIR/ui/zashboard"
 CONFIG_FILE="$CONFIG_DIR/config.yaml"
 
 mkdir -p "$CONFIG_DIR"
@@ -19,8 +19,8 @@ echo "====> Cleaning up files in $CONFIG_DIR (preserving Geo and config.yaml)...
 rm -rf "$CONFIG_DIR"/!(config.yaml|geoip*|geosite*) 2>/dev/null || true
 shopt -u extglob
 
-# mkdir -p "$WEBUI_DIR"
-# cp -rf "$RESOURCE_DIR/WEBUI/." "$WEBUI_DIR/"
+mkdir -p "$WEBUI_DIR"
+cp -rf "$RESOURCE_DIR/WEBUI/." "$WEBUI_DIR/"
 
 GEO_VAL="${GEO_UPDATE:-false}"
 if [ "$GEO_VAL" = "true" ]; then
@@ -31,17 +31,5 @@ else
     rm -rf "$CONFIG_DIR"/geoip* "$CONFIG_DIR"/geosite* 2>/dev/null || true
     echo "====> GEO_UPDATE is false: Skipping Geo databases copy."
 fi
-
-[ -z "$WEBUI_LISTEN_ADDR" ] && WEBUI_LISTEN_ADDR="0.0.0.0:9090"
-
-if [ -z "$WEBUI_SECRET" ] || [ "$WEBUI_SECRET" = "none" ]; then
-    WEBUI_SECRET=""
-    echo "====> Web UI authentication is DISABLED."
-else
-    echo " Web UI password set: $WEBUI_SECRET"
-fi
-
-export WEBUI_LISTEN_ADDR
-export WEBUI_SECRET
 
 echo "====> Environment initialization completed."
