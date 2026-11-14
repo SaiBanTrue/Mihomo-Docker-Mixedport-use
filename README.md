@@ -27,7 +27,7 @@
 
 本指南介绍如何在 Linux 宿主机上通过 **Docker Macvlan** 网络模式部署 `mihomo`（原 Clash Meta），实现独立的局域网 IP 接入。同时，通过挂载独立的 `internal` 内部桥接网络配合 `socat` 端口转发，解决 Macvlan 模式下宿主机与容器之间默认网络隔离的问题，确保宿主机可直接访问 `7890` 代理端口及 `9090`（Zashboard）控制面板。
 
-> **注意事项**：本文档所有命令均默认物理网卡为 `eth0`、局域网网段为 `192.168.6.0/24`。执行前请根据**步骤 1** 的实际查询结果按需替换。
+> **注意事项**：本文档所有命令均默认物理网卡为 `eth0`、局域网网段为 `192.168.1.0/24`。执行前请根据**步骤 1** 的实际查询结果按需替换。
 
 ---
 
@@ -55,7 +55,7 @@ Macvlan 需要物理网卡开启**混杂模式（Promiscuous Mode）**以接收�
 sudo ip link set eth0 promisc on
 
 # 2. 清理可能存在的旧版持久化脚本
-sudo rm -f /etc/NetworkManager/dispatcher.d/99-eth0-promisc.sh
+sudo rm -f /etc/NetworkManager/dispatcher.d/99-mihomo-network.sh
 
 # 3. 写入 NetworkManager 网络事件触发脚本，实现混杂模式与内核转发持久化
 sudo tee /etc/NetworkManager/dispatcher.d/99-mihomo-network.sh << 'EOF'
@@ -64,18 +64,17 @@ sudo tee /etc/NetworkManager/dispatcher.d/99-mihomo-network.sh << 'EOF'
 INTERFACE="$1"
 ACTION="$2"
 
-# 当指定物理网卡启动或 IPv6 DHCP 状态变化时自动应用以下网络参数
-if [ "$INTERFACE" = "eth0" ] && { [ "$ACTION" = "up" ] \vert{}\vert{} [ "$ACTION" = "dhcp6-change" ]; }; then
-    # 开启物理网卡混杂模式
+if [ "$INTERFACE" = "eth0" ] && { [ "$ACTION" = "up" ] || [ "$ACTION" = "dhcp6-change" ]; }; then
+    # 开启混杂模式
     ip link set eth0 promisc on
     
-    # 开启 IPv4 路由转发
+    # IPv4 转发
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv4.conf.all.forwarding=1
     sysctl -w net.ipv4.conf.default.forwarding=1
     sysctl -w net.ipv4.conf.eth0.forwarding=1
 
-    # 开启 IPv6 路由转发，并将 accept_ra 设为 2（确保开启转发后依然接收路由通告以获取 IPv6 地址）
+    # IPv6 转发与 RA 保持（2 表示即使开启 forwarding 依然接受 RA 路由通告）
     sysctl -w net.ipv6.conf.all.forwarding=1
     sysctl -w net.ipv6.conf.default.forwarding=1
     sysctl -w net.ipv6.conf.eth0.forwarding=1
@@ -127,8 +126,8 @@ docker network rm mihomo-macvlan 2>/dev/null || true
 
 # 2. 创建 Macvlan 网络（请确保 subnet、gateway 和 parent 网卡与你的局域网环境一致）
 docker network create -d macvlan \
-  --subnet=192.168.6.0/24 \
-  --gateway=192.168.6.1 \
+  --subnet=192.168.1.0/24 \
+  --gateway=192.168.1.1 \
   -o parent=eth0 \
   mihomo-macvlan
 
@@ -150,7 +149,7 @@ docker run -d \
   --cap-add NET_ADMIN \
   --cap-add NET_RAW \
   --network mihomo-macvlan \
-  --ip 192.168.6.250 \
+  --ip 192.168.1.250 \
   --device /dev/net/tun \
   -v /mnt/docker/mihomoconfig:/config \
   -e TZ=Asia/Shanghai \
@@ -184,16 +183,16 @@ docker restart mihomo-core
 
 ### 6.2 验证容器内双网卡路由表
 
-检查容器默认路由是否依然走 Macvlan 网关（`192.168.6.1`），避免内网接口抢占默认出口。
+检查容器默认路由是否依然走 Macvlan 网关（`192.168.1.1`），避免内网接口抢占默认出口。
 
 ```bash
 # 查看容器内部路由表
 docker exec -it mihomo-core ip route show
 
 # 预期输出：
-# default via 192.168.6.1 dev eth0
+# default via 192.168.1.1 dev eth0
 # 172.18.0.0/24 dev eth1 scope link  src 172.18.0.2
-# 192.168.6.0/24 dev eth0 scope link  src 192.168.6.250
+# 192.168.1.0/24 dev eth0 scope link  src 192.168.1.250
 # 198.18.0.0/30 dev Meta scope link  src 198.18.0.0
 ```
 
