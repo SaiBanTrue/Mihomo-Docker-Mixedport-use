@@ -1,4 +1,4 @@
-# Mihomo-Docker-Mixedport 介绍（仅支持armbian）
+# 0. Mihomo-Docker-Mixedport 介绍（仅支持armbian）
 
 
 一个基于 Alpine Linux 的轻量化 Mihomo (Clash Meta) 容器构建方案。支持自动化依赖预处理、多环境变量动态配置以及 GitHub Actions 自动化容器构建。  
@@ -19,7 +19,7 @@
 - [Zephyruso/zashboard](https://github.com/Zephyruso/zashboard)
 
 
-# 容器运行
+# 1. 容器运行
 本指南介绍如何在 Linux 宿主机上通过 **Docker Macvlan** 网络模式部署 `mihomo`，实现独立的局域网 IP 接入。同时，通过挂载独立的 `internal` 内部桥接网络配合 `socat` 端口转发，解决 Macvlan 模式下宿主机与容器之间默认网络隔离的问题，确保宿主机可直接访问 `7890` 代理端口及 `9090`（Zashboard）控制面板。
 
 ## 网络架构拓扑
@@ -250,7 +250,7 @@ for i in $(seq 1 100); do
 done
 ```
 
-# 环境变量说明
+# 2. 环境变量说明
 
 变量用于控制容器的行为（如更新频率、订阅源、WebUI 设置等）。  
 变量会直接修改并应用到 `/config/config.yaml` 配置文件中。 
@@ -336,7 +336,7 @@ Mihomo-Docker-Mixedport/
         └── assets/
 ```
 
-# ghcr.io构建更新记录
+# 3. ghcr.io构建更新记录
 
 <!-- BUILD_INFO_START -->
 - **更新时间**：`2026-10-25 15:29:35 (CST)` &nbsp;|&nbsp; **镜像版本**：`v1.19.33-v3.29.1`
